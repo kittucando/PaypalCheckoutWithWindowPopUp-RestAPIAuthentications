@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewBag.Title = "PaypalAuthenticate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Paypal Authenticate</h2>
+
+<div>
+
+    <form action="/Home/PaypalAuthenticate" method="post">
+        <div class="form-group">
+            <label for="email">Client Id</label>
+            <input type="text" class="form-control" name="username" id="username" value="AarlI4RwVOLRy7hXuotW8NA-ERBfpIRDYIgLZmGQ1SR0-MQksxzib2Db31lqGGYKCSdGPVZjZPp_5cjW">
+        </div>
+        <div class="form-group">
+            <label for="pwd">Password:</label>
+            <input type="text" class="form-control" name="password" id="password" value="EBtmh8WXrMW34LxpivASFur6BiMiX_RJ393VdUXMDaTsPSldkoi6yoxDIyTNIFB65Ivizw3agkK8oQb_">
+        </div>
+        @*<input type="hidden" value="application/x-www-form-urlencoded" id="Content-Type" name="Content-Type" />
+            <input type="hidden" value="client_credentials" id="grant_type" name="grant_type"/>*@
+        <input type="hidden" name="PostUrl" value="https://api.sandbox.paypal.com/v1/oauth2/token" />
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+
+
+    <div style="text-align:center">@ViewBag.ResultMessage</div>
+    <div style="text-align:center">@ViewBag.AccessToken</div>
+    <div style="text-align:center">@ViewBag.Error</div>
+   
+
+</div>

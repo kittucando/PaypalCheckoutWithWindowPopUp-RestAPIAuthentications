@@ -1,0 +1,320 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://www.paypal.com/sdk/js?client-id=AarlI4RwVOLRy7hXuotW8NA-ERBfpIRDYIgLZmGQ1SR0-MQksxzib2Db31lqGGYKCSdGPVZjZPp_5cjW">
+    </script>
+</head>
+
+<body>
+
+    <div>
+        @*{  #region 2nd and old way
+            <head>
+                < meta http - equiv = "X-UA-Compatible" content = "IE=edge" />
+                     < meta name = "viewport" content = "width=device-width, initial-scale=1">
+                        < script src = "https://www.paypalobjects.com/api/checkout.js" ></ script>
+                     </ head>
+
+                     < body>
+
+                         < div id = "paypal-button" ></ div>
+
+                          < script>
+                              paypal.Button.render({
+                    env: 'sandbox', // Or 'sandbox',
+
+                        commit: true, // Show a 'Pay Now' button
+
+                        style:
+                        {
+                        color: 'gold',
+                            size: 'small'
+                        },
+
+                        payment: function(data, actions) {
+                            /*
+                             * Set up the payment here
+                             */
+                        },
+
+                        onAuthorize: function(data, actions) {
+                            /*
+                             * Execute the payment here
+                             */
+                        },
+
+                        onCancel: function(data, actions) {
+                            /*
+                             * Buyer cancelled the payment
+                             */
+                        },
+
+                        onError: function(err) {
+                            /*
+                             * An error occurred during the transaction
+                             */
+                        }
+                    }, '#paypal-button');
+                    </script>
+                    </body>
+             #endregion }
+        *@
+    </div>
+    <div>
+        Pay through Paypal Checkout in a popup window
+
+    </div>
+    &nbsp; &nbsp; &nbsp;
+    <div id="time" style="font-weight:bold;"></div>
+    <div style="width:100px;height:200px;text-align:center;padding:0px 150px;"> <div id=paypal-button-container></div></div>
+    &nbsp; &nbsp; &nbsp;
+    <div id="paymentresult"> </div>
+
+    <script>
+        // 1st way
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                // Set up the transaction
+                // alert('actions1' + JSON.stringify(actions));
+                console.log('actions1' + JSON.stringify(data));
+                return actions.order.create({
+                    //"merchant-id": "7LAZDARD3GZAC",
+                    //"intent": "CAPTURE",
+                    purchase_units: [
+                        {
+                            description: "Mobile World Store order - 1234",
+                            amount: {
+                                value: "211",
+                                breakdown: { item_total: { value: "211", currency_code: "USD" } }
+                            },
+                            custom: { MyorderID: "12346" },
+                            items: [{ sku: 'KUTO', name: 'Samsung Note 6', quantity: '1', unit_amount: { value: "100.5", currency_code: "USD" } }, { sku: 'KUTO2', name: 'Apple 6s', quantity: '1', unit_amount: { value: "110.5", currency_code: "USD" } }],
+                            custom_id: "132312",
+                            invoice_id: "ABCE32323272",
+                        }],
+
+                });
+            },
+            onCancel: function (data) {
+                alert('you have cancelled the order,@@developer: Show cancel page or return to cart.');
+                // Show a cancel page, or return to cart
+                // alert(JSON.stringify(data));
+            },
+            onAuthorize: function (data, actions) {
+                // Get the payment details
+                return actions.payment.get()
+                    .then(function (paymentDetails) {
+                        // Show a confirmation using the details from paymentDetails
+                        // Then listen for a click on your confirm button
+                        document.querySelector('#confirm-button')
+                            .addEventListener('click', function () {
+                                // Execute the payment
+                                return actions.payment.execute()
+                                    .then(function () {
+                                        // Show a success page to the buyer
+                                    });
+                            });
+                    });
+            },
+            onApprove: function (data, actions) {
+                //  alert('onApprove' + JSON.stringify(actions));
+                // Capture the funds from the transaction
+
+                return actions.order.capture().then(function (details) {
+                    // Show a success message to your buyer
+                    //  alert('detailscapture' + JSON.stringify(details));
+                    // alert('Transaction completed by ' + details.payer.name.given_name);
+
+                    actions.order.get().then(function (details) {
+                        //    alert('onApprove' + JSON.stringify(actions));
+                        // Show a success message to your buyer
+                        //  alert('Transaction details' + JSON.stringify(details));
+                        var resultdiv = document.getElementById('paymentresult');
+                        resultdiv.innerHTML = 'Transaction details' + JSON.stringify(details);
+                        //  alert('Transaction completed by ' + details.payer.name.given_name);
+                    });
+
+                    //return fetch('/paypal-transaction-complete', {
+                    //    method: 'post',
+                    //    body: JSON.stringify({
+                    //        orderID: data.orderID
+                    //    })
+                    //});
+                });
+            },
+            onError: function (err) {
+                alert('Something went wrong :' + JSON.stringify(err));
+            }
+        }).render('#paypal-button-container');
+
+
+
+
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            setInterval(function () {
+                minutes = parseInt(timer / 60, 10)
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+               
+                if (timer-- > -1) {
+                    display.textContent = minutes + ":" + seconds;
+                    return false;
+                }   
+                location.reload(); 
+                return false;
+                //if (--timer < 0) {
+                //   // alert(timer);
+                   
+                //    //timer = duration;
+
+                //    paypal.Buttons({
+                //        onCancel: function (data) {
+                //            alert('you have cancelled the order,@@developer: Show cancel page or return to cart.');
+                //            // Show a cancel page, or return to cart
+                //            // alert(JSON.stringify(data));
+                //        }}).
+                //    setTimeout(function () { location.reload(); }, 10);
+
+
+                //}
+            }, 1000);
+        }
+
+        window.onload = function () {           
+            var fiveMinutes = 60 * 10,//in seconds
+                display = document.querySelector('#time');
+            startTimer(fiveMinutes, display);
+        };
+
+
+       
+    </script>
+    <script>
+                                                  //2nd way
+                                                                            //paypal.Buttons({
+                                                                            //    env: 'sandbox', // Optional: specify 'sandbox' environment
+                                                                            //    //client: {
+                                                                            //    //    sandbox: 'xxxxxxxxx',
+                                                                            //    //    production: 'xxxxxxxxx'
+                                                                            //    //},
+                                                                            //    commit: true, // Optional: show a 'Pay Now' button in the checkout flow
+                                                                            //    payment: function (data, actions) {
+                                                                            //        console.log('payment data:' + JSON.stringify(data) + 'actions:' + JSON.stringify(actions));
+                                                                            //        return actions.payment.create({
+                                                                            //            payment: {
+                                                                            //                transactions: [
+                                                                            //                    {
+                                                                            //                        amount: {
+                                                                            //                            total: '1.00',
+                                                                            //                            currency: 'USD'
+                                                                            //                        },
+                                                                            //                        custom: { myOwnId: 'krishna007' },
+                                                                            //                       // invoice_number: 'krishna007',
+                                                                            //                        items: [{ sku: 'KUTO', name: 'kesava', quantity: '1', price: '10.38', currency :'USD'}],
+                                                                            //                    }
+                                                                            //                ]
+                                                                            //            }
+                                                                            //        });
+                                                                            //    },
+                                                                            //    onAuthorize: function (data, actions) {
+                                                                            //        // Get the payment details
+                                                                            //        console.log('Authorize data:' + JSON.stringify(data) + 'actions:' + JSON.stringify(actions));
+                                                                            //        return actions.payment.get()
+                                                                            //            .then(function (paymentDetails) {
+                                                                            //                alert('paymentDetails'+paymentDetails);
+                                                                            //                // Show a confirmation using the details from paymentDetails
+                                                                            //                // Then listen for a click on your confirm button
+                                                                            //                document.querySelector('#confirm-button')
+                                                                            //                    .addEventListener('click', function () {
+                                                                            //                        // Execute the payment
+                                                                            //                        return actions.payment.execute()
+                                                                            //                            .then(function () {
+                                                                            //                                alert('asfafafs');
+                                                                            //                                // Show a success page to the buyer
+                                                                            //                            });
+                                                                            //                    });
+                                                                            //            });
+                                                                            //    }
+                                                                            //}).render('#paypal-button-container');</script>
+    <script>
+                                                                //3rd Way
+                                                        //paypal.Buttons({
+                                                        //    createorder: function (data, actions) {
+                                                        //        // set up the transaction
+                                                        //        console.log('actions1' + json.stringify(data));
+                                                        //        return actions.order.create({
+                                                        //            //"merchant-id": "7lazdard3gzac",
+                                                        //            //"intent": "capture",
+                                                        //            //"purchase_units": [{
+                                                        //            //    "amount": {
+                                                        //            //        "currency_code": "usd",
+                                                        //            //        "value": "100.00"
+                                                        //            //    },
+                                                        //            //    "payee": {
+                                                        //            //        "email_address": "seller@example.com"
+                                                        //            //    },
+                                                        //            //    "payment_instruction": {
+                                                        //            //        "disbursement_mode": "instant",
+                                                        //            //        "platform_fees": [{
+                                                        //            //            "amount": {
+                                                        //            //                "currency_code": "usd",
+                                                        //            //                "value": "25.00"
+                                                        //            //            },
+                                                        //            //            "payee": {
+                                                        //            //                "email_address": "seller@example.com"
+                                                        //            //            }
+                                                        //            //        }],
+                                                        //            //    }
+                                                        //            //}]
+                                                        //            // authorization :"",
+                                                        //            //  "content-type": "application/json",
+                                                        //            // id: "3252355",
+                                                        //            // intent:"capture",
+                                                        //            purchase_units: [
+                                                        //                {
+                                                        //                    "amount": {
+                                                        //                               "currency_code": "USD",
+                                                        //                               "value": "100.00"
+                                                        //                           },
+                                                        //                }],
+                                                        //        });
+                                                        //    },
+                                                        //    oncancel: function (data) {
+                                                        //        // show a cancel page, or return to cart
+                                                        //        alert(json.stringify(data));
+                                                        //    },
+                                                        //    onapprove: function (data, actions) {
+                                                        //        alert('actions2' + json.stringify(data));
+                                                        //        // capture the funds from the transaction
+                                                        //        actions.order.get().then(function (details) {
+                                                        //            // show a success message to your buyer
+                                                        //            alert('details' + json.stringify(details));
+                                                        //            //alert('transaction completed by ' + details.payer.name.given_name);
+                                                        //        });
+                                                        //        return actions.order.capture().then(function (details) {
+                                                        //            // show a success message to your buyer
+                                                        //            alert('detailscapture' + json.stringify(details));
+                                                        //           // alert('transaction completed by ' + details.payer.name.given_name);
+                                                        //            //return fetch('/paypal-transaction-complete', {
+                                                        //            //    method: 'post',
+                                                        //            //    body: json.stringify({
+                                                        //            //        orderid: data.orderid
+                                                        //            //    })
+                                                        //            //});
+                                                        //        });
+                                                        //    },
+                                                        //}).render('#paypal-button-container');
+    </script>
+</body>
+</html>
